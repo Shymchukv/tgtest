@@ -4,68 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Розумний Дім</title>
-    <!-- Підключаємо офіційну бібліотеку Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Підключаємо сучасний шрифт -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #000000);
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --card-bg: var(--tg-theme-secondary-bg-color, #1c1c1e);
+        }
         body {
-            background-color: var(--tg-theme-bg-color, #1a1a1a);
-            color: var(--tg-theme-text-color, #ffffff);
-            font-family: sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            margin: 0;
         }
         .header {
-            font-size: 24px;
-            font-weight: bold;
+            width: 100%;
             margin-bottom: 25px;
             margin-top: 10px;
         }
-        .btn {
-            background-color: var(--tg-theme-button-color, #2a82d6);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 8px 0;
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 15px;
+            color: #8e8e93;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             width: 100%;
-            font-size: 18px;
-            font-weight: bold;
+            max-width: 400px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 22px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            height: 110px;
+            box-sizing: border-box;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
+            transition: transform 0.1s, opacity 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .btn:active {
-            transform: scale(0.96);
+        .card:active {
+            transform: scale(0.92);
+            opacity: 0.8;
         }
-        .gas-btn { 
-            background-color: #e53935; /* Червона кнопка для газу */
-            color: white;
+        .icon {
+            font-size: 32px;
         }
+        .title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        /* Стилі для конкретних карток */
+        .card.light-on { background: linear-gradient(135deg, #32D74B, #28a745); color: #fff; }
+        .card.light-off { background: linear-gradient(135deg, #FF453A, #dc3545); color: #fff; }
+        .card.climate { background: linear-gradient(135deg, #0A84FF, #007bff); color: #fff; }
+        .card.gas { background: linear-gradient(135deg, #FF9F0A, #fd7e14); color: #fff; }
     </style>
 </head>
 <body>
-    <div class="header">🏠 Пульт Управління</div>
+    <div class="header">
+        <h1>Мій Дім</h1>
+        <p>Панель керування</p>
+    </div>
 
-    <button class="btn" onclick="sendCommand('light_on')">🟢 Увімкнути світло</button>
-    <button class="btn" onclick="sendCommand('light_off')">🔴 Вимкнути світло</button>
-    <button class="btn" onclick="sendCommand('climate')">🌡 Клімат (Темп/Волога)</button>
-    <button class="btn gas-btn" onclick="sendCommand('gas')">💨 Перевірити Газ</button>
+    <div class="grid">
+        <div class="card light-on" onclick="sendCommand('light_on')">
+            <div class="icon">💡</div>
+            <div class="title">Увімкнути</div>
+        </div>
+        <div class="card light-off" onclick="sendCommand('light_off')">
+            <div class="icon">🌑</div>
+            <div class="title">Вимкнути</div>
+        </div>
+        <div class="card climate" onclick="sendCommand('climate')">
+            <div class="icon">🌡️</div>
+            <div class="title">Клімат</div>
+        </div>
+        <div class="card gas" onclick="sendCommand('gas')">
+            <div class="icon">💨</div>
+            <div class="title">Стан Газу</div>
+        </div>
+    </div>
 
     <script>
-        // Ініціалізуємо додаток
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Розгортаємо апку на весь екран при відкритті
-
-        // ⚠️ ВАЖЛИВО: Впиши сюди юзернейм свого бота БЕЗ @
-        const botUsername = "@homenemkkursbot";
+        tg.expand(); // Відкриває апку на весь екран
+        
+        // ⚠️ НЕ ЗАБУДЬ ВПИСАТИ СВІЙ ЮЗЕРНЕЙМ БОТА ТУТ (без @)
+        const botUsername = "ТВІЙ_ЮЗЕРНЕЙМ_БОТА";
 
         function sendCommand(cmd) {
-            // Формуємо приховане посилання. 
-            // Воно закриє апку і відправить боту команду (наприклад, /start light_on)
-            let url = `https://t.me/${botUsername}?start=${cmd}`;
+            let url = "https://t.me/" + botUsername + "?start=" + cmd;
             tg.openTelegramLink(url);
         }
     </script>
