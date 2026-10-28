@@ -2,115 +2,178 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Розумний Дім</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Підключаємо сучасний шрифт -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: var(--tg-theme-bg-color, #000000);
-            --text-color: var(--tg-theme-text-color, #ffffff);
-            --card-bg: var(--tg-theme-secondary-bg-color, #1c1c1e);
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
+            margin: 0; padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #08080a; /* Глибокий темний колір */
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
-        .header {
-            width: 100%;
-            margin-bottom: 25px;
-            margin-top: 10px;
+        
+        /* Анімовані неонові сфери на фоні */
+        .glow-1, .glow-2 {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: 0;
+            animation: float 8s ease-in-out infinite alternate;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
+        .glow-1 {
+            width: 250px; height: 250px;
+            background: rgba(43, 100, 255, 0.45);
+            top: -50px; left: -50px;
         }
-        .header p {
-            margin: 5px 0 0;
-            font-size: 15px;
-            color: #8e8e93;
+        .glow-2 {
+            width: 220px; height: 220px;
+            background: rgba(255, 43, 131, 0.35);
+            bottom: 50px; right: -50px;
+            animation-delay: -4s;
         }
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); }
+            100% { transform: translateY(40px) translateX(40px); }
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .header { margin-bottom: 35px; }
+        .header h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
+        .header p { margin: 5px 0 0; font-size: 15px; color: rgba(255,255,255,0.5); font-weight: 500; }
+
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            width: 100%;
-            max-width: 400px;
+            gap: 16px;
         }
+        
+        /* Дизайн карток - Матове скло */
         .card {
-            background-color: var(--card-bg);
-            border-radius: 22px;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            padding: 24px 16px;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            justify-content: space-between;
-            height: 110px;
-            box-sizing: border-box;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .card:active {
-            transform: scale(0.92);
-            opacity: 0.8;
+        .card:active { transform: scale(0.93); background: rgba(255, 255, 255, 0.08); }
+        
+        .icon-wrapper {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
         }
-        .icon {
-            font-size: 32px;
+
+        /* Градієнти іконок */
+        .light-on .icon-wrapper { background: linear-gradient(135deg, #00f260, #0575e6); }
+        .light-off .icon-wrapper { background: linear-gradient(135deg, #2b2b36, #15151a); border: 1px solid rgba(255,255,255,0.05); }
+        .climate .icon-wrapper { background: linear-gradient(135deg, #36D1DC, #5B86E5); }
+        .gas .icon-wrapper { background: linear-gradient(135deg, #FF416C, #FF4B2B); }
+        .settings .icon-wrapper { background: linear-gradient(135deg, #8E2DE2, #4A00E0); }
+        
+        .card span {
+            font-size: 15px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
         }
-        .title {
-            font-size: 16px;
-            font-weight: 600;
+
+        /* Кнопка налаштувань на всю ширину */
+        .full-width {
+            grid-column: span 2;
+            flex-direction: row;
+            justify-content: flex-start;
+            padding: 18px 24px;
+            margin-top: 8px;
         }
-        /* Стилі для конкретних карток */
-        .card.light-on { background: linear-gradient(135deg, #32D74B, #28a745); color: #fff; }
-        .card.light-off { background: linear-gradient(135deg, #FF453A, #dc3545); color: #fff; }
-        .card.climate { background: linear-gradient(135deg, #0A84FF, #007bff); color: #fff; }
-        .card.gas { background: linear-gradient(135deg, #FF9F0A, #fd7e14); color: #fff; }
+        .full-width .icon-wrapper {
+            width: 50px; height: 50px;
+            margin-bottom: 0;
+            margin-right: 18px;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Мій Дім</h1>
-        <p>Панель керування</p>
-    </div>
-
-    <div class="grid">
-        <div class="card light-on" onclick="sendCommand('light_on')">
-            <div class="icon">💡</div>
-            <div class="title">Увімкнути</div>
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+    
+    <div class="content">
+        <div class="header">
+            <h1>Мій Дім</h1>
+            <p>Центр керування</p>
         </div>
-        <div class="card light-off" onclick="sendCommand('light_off')">
-            <div class="icon">🌑</div>
-            <div class="title">Вимкнути</div>
-        </div>
-        <div class="card climate" onclick="sendCommand('climate')">
-            <div class="icon">🌡️</div>
-            <div class="title">Клімат</div>
-        </div>
-        <div class="card gas" onclick="sendCommand('gas')">
-            <div class="icon">💨</div>
-            <div class="title">Стан Газу</div>
+        
+        <div class="grid">
+            <div class="card light-on" onclick="sendCommand('light_on')">
+                <div class="icon-wrapper">💡</div>
+                <span>Світло УВІМК</span>
+            </div>
+            
+            <div class="card light-off" onclick="sendCommand('light_off')">
+                <div class="icon-wrapper">🌑</div>
+                <span>Світло ВИМК</span>
+            </div>
+            
+            <div class="card climate" onclick="sendCommand('climate')">
+                <div class="icon-wrapper">🌡️</div>
+                <span>Клімат</span>
+            </div>
+            
+            <div class="card gas" onclick="sendCommand('gas')">
+                <div class="icon-wrapper">💨</div>
+                <span>Газ</span>
+            </div>
+            
+            <!-- Нова кнопка налаштувань -->
+            <div class="card settings full-width" onclick="sendCommand('settings')">
+                <div class="icon-wrapper">⚙️</div>
+                <span>Налаштування системи</span>
+            </div>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Відкриває апку на весь екран
+        tg.expand(); 
         
-        // ⚠️ НЕ ЗАБУДЬ ВПИСАТИ СВІЙ ЮЗЕРНЕЙМ БОТА ТУТ (без @)
-        const botUsername = "@homenemkkursbot";
+        // ⚠️ ВПИШИ ЮЗЕРНЕЙМ СВОГО БОТА (БЕЗ @)
+        const botUsername = "homenemkkursbot";
 
         function sendCommand(cmd) {
+            // Вмикаємо вібрацію (Haptic Feedback) для ВАУ-ефекту при тапі
+            tg.HapticFeedback.impactOccurred('medium');
+            
             let url = "https://t.me/" + botUsername + "?start=" + cmd;
             tg.openTelegramLink(url);
         }
