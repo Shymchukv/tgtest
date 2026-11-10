@@ -7,73 +7,102 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Чорна / Темна тема (За замовчуванням) */
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --icon-bg: #334155;
+            --border-color: #334155;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme {
+            /* Біла / Світла тема */
             --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-sub: #64748b;
+            --icon-bg: #f8fafc;
+            --border-color: #e2e8f0;
             --accent-blue: #2563eb;
             --accent-green: #10b981;
             --accent-red: #ef4444;
-            --accent-yellow: #f59e0b;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
             display: flex;
             justify-content: center;
-            padding: 24px 16px;
+            padding: 20px 16px;
             min-height: 100vh;
         }
 
         .app-container {
             width: 100%;
-            max-width: 850px;
+            max-width: 800px;
         }
 
-        /* Шапка */
+        /* Шапка з перемикачем теми */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
-        .header h1 { font-size: 1.6rem; font-weight: 700; color: var(--text-main); }
-        .header p { font-size: 0.9rem; color: var(--text-sub); margin-top: 2px; }
+        .header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+        .header p { font-size: 0.85rem; color: var(--text-sub); }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--shadow);
+        }
+
         .system-status {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: #e2e8f0;
-            padding: 6px 14px;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
         .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); display: inline-block; }
 
-        /* Сітка карток */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-        }
-
-        .card {
+        /* Загальний блок телеметрії (все в 1 місці) */
+        .telemetry-card {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
+            border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 16px;
         }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.08); }
 
         .card-header {
             display: flex;
@@ -81,77 +110,88 @@
             align-items: center;
             margin-bottom: 16px;
         }
-        .card-title { font-size: 0.95rem; font-weight: 600; color: var(--text-sub); display: flex; align-items: center; gap: 8px; }
+        .card-title { font-size: 1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            text-align: center;
+            background: var(--icon-bg);
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .telemetry-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .telemetry-label { font-size: 0.8rem; font-weight: 500; color: var(--text-sub); }
+        .telemetry-val { font-size: 1.4rem; font-weight: 700; color: var(--text-main); }
+        .telemetry-unit { font-size: 0.9rem; font-weight: 500; color: var(--text-sub); }
+
+        /* Прогрес-бар газу */
+        .progress-container { margin-top: 14px; }
+        .progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; }
+        .progress-bar-bg { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--accent-green); transition: width 0.4s ease, background-color 0.4s ease; }
+
+        /* Сітка органів керування */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .control-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-info { display: flex; align-items: center; gap: 12px; }
         .icon-box {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
-            background: #f8fafc;
+            background: var(--icon-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            border: 1px solid #e2e8f0;
+            font-size: 1.3rem;
         }
 
-        /* Показники чисел */
-        .metric-value { font-size: 2.2rem; font-weight: 700; color: var(--text-main); }
-        .metric-unit { font-size: 1.1rem; font-weight: 500; color: var(--text-sub); }
-
-        /* Прогрес-бар для газу */
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            margin-top: 12px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-green);
-            transition: width 0.4s ease, background-color 0.4s ease;
-        }
-
-        /* iOS Switch (Перемикач) */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #cbd5e1;
-            transition: .3s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute; content: "";
-            height: 22px; width: 22px;
-            left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        input:checked + .slider { background-color: var(--accent-blue); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        /* Статуси */
-        .status-text {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 8px;
-            color: var(--text-sub);
-        }
+        .control-text h3 { font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
+        .status-text { font-size: 0.8rem; font-weight: 500; color: var(--text-sub); margin-top: 2px; }
         .status-text.active { color: var(--accent-blue); }
         .status-text.danger { color: var(--accent-red); }
+
+        /* iOS Switch */
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color); transition: .3s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+            background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider { background-color: var(--accent-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        @media (max-width: 500px) {
+            .controls-grid { grid-template-columns: 1fr; }
+            .telemetry-grid { grid-template-columns: repeat(3, 1fr); padding: 10px 6px; }
+            .telemetry-val { font-size: 1.1rem; }
+        }
     </style>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -160,139 +200,155 @@
 <div class="app-container">
     <div class="header">
         <div>
-            <h1>Мій Дім</h1>
-            <p>Панель керування ESP32</p>
+            <h1>Пульт Дім</h1>
+            <p>ESP32 Control Center</p>
         </div>
-        <div class="system-status">
-            <span class="dot"></span> Онлайн
+        <div class="header-actions">
+            <button class="theme-toggle-btn" onclick="toggleTheme()">
+                <span id="themeIcon">☀️</span> <span id="themeText">Світла</span>
+            </button>
+            <div class="system-status">
+                <span class="dot"></span> Онлайн
+            </div>
         </div>
     </div>
 
-    <div class="grid">
-        <!-- Температура -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Температура</span>
-                <div class="icon-box">🌡</div>
+    <!-- ОБ'ЄДНАНИЙ БЛОК ДАТЧИКІВ -->
+    <div class="telemetry-card">
+        <div class="card-header">
+            <span class="card-title">📊 Клімат та Безпека</span>
+            <span id="gasBadge" style="font-size: 0.8rem; font-weight: 600; color: var(--accent-green);">✅ В нормі</span>
+        </div>
+        <div class="telemetry-grid">
+            <div class="telemetry-item">
+                <span class="telemetry-label">Температура</span>
+                <div><span class="telemetry-val" id="temp">--</span><span class="telemetry-unit"> °C</span></div>
             </div>
-            <div>
-                <span class="metric-value" id="temp">--</span>
-                <span class="metric-unit">°C</span>
+            <div class="telemetry-item">
+                <span class="telemetry-label">Вологість</span>
+                <div><span class="telemetry-val" id="hum">--</span><span class="telemetry-unit"> %</span></div>
+            </div>
+            <div class="telemetry-item">
+                <span class="telemetry-label">Рівень газу</span>
+                <div><span class="telemetry-val" id="gas">--</span><span class="telemetry-unit"> /4095</span></div>
             </div>
         </div>
 
-        <!-- Вологість -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Вологість</span>
-                <div class="icon-box">💧</div>
+        <div class="progress-container">
+            <div class="progress-info">
+                <span>Концентрація газу MQ-2</span>
+                <span id="gasPercent">0%</span>
             </div>
-            <div>
-                <span class="metric-value" id="hum">--</span>
-                <span class="metric-unit">%</span>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="gasProgress"></div>
             </div>
         </div>
+    </div>
 
-        <!-- Датчик Газу -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Рівень газу</span>
-                <div class="icon-box">💨</div>
-            </div>
-            <div>
-                <span class="metric-value" id="gas">--</span>
-                <span class="metric-unit">/ 4095</span>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="gasProgress"></div>
-                </div>
-                <div class="status-text" id="gasStatus">Норма</div>
-            </div>
-        </div>
-
+    <!-- ОРГАНИ КЕРУВАННЯ -->
+    <div class="controls-grid">
         <!-- Двері -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Дверний замок</span>
-                <label class="switch">
-                    <input type="checkbox" id="doorSwitch" onchange="togglePath('/home/door', this.checked)">
-                    <span class="slider"></span>
-                </label>
+        <div class="control-card">
+            <div class="control-info">
+                <div class="icon-box">🚪</div>
+                <div class="control-text">
+                    <h3>Замок дверей</h3>
+                    <div class="status-text" id="doorStatus">Зачинено</div>
+                </div>
             </div>
-            <div class="icon-box" style="margin-bottom: 12px;">🚪</div>
-            <div class="status-text" id="doorStatus">Зачинено</div>
+            <label class="switch">
+                <input type="checkbox" id="doorSwitch" onchange="togglePath('/home/door', this.checked)">
+                <span class="slider"></span>
+            </label>
         </div>
 
-        <!-- Вуличне світло -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Фасадне світло</span>
-                <label class="switch">
-                    <input type="checkbox" id="outdoorSwitch" onchange="togglePath('/home/light_outdoor', this.checked)">
-                    <span class="slider"></span>
-                </label>
+        <!-- Фасадне світло -->
+        <div class="control-card">
+            <div class="control-info">
+                <div class="icon-box">🌳</div>
+                <div class="control-text">
+                    <h3>Фасадне світло</h3>
+                    <div class="status-text" id="outdoorStatus">Вимкнено</div>
+                </div>
             </div>
-            <div class="icon-box" style="margin-bottom: 12px;">🌳</div>
-            <div class="status-text" id="outdoorStatus">Вимкнено</div>
+            <label class="switch">
+                <input type="checkbox" id="outdoorSwitch" onchange="togglePath('/home/light_outdoor', this.checked)">
+                <span class="slider"></span>
+            </label>
         </div>
 
         <!-- Кімнатне світло -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Кімнатне світло</span>
-                <label class="switch">
-                    <input type="checkbox" id="indoorSwitch" onchange="togglePath('/home/light_indoor', this.checked)">
-                    <span class="slider"></span>
-                </label>
+        <div class="control-card">
+            <div class="control-info">
+                <div class="icon-box">🏠</div>
+                <div class="control-text">
+                    <h3>Кімнатне світло</h3>
+                    <div class="status-text" id="indoorStatus">Вимкнено</div>
+                </div>
             </div>
-            <div class="icon-box" style="margin-bottom: 12px;">🏠</div>
-            <div class="status-text" id="indoorStatus">Вимкнено</div>
+            <label class="switch">
+                <input type="checkbox" id="indoorSwitch" onchange="togglePath('/home/light_indoor', this.checked)">
+                <span class="slider"></span>
+            </label>
         </div>
 
         <!-- Охорона -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">Режим охорони</span>
-                <label class="switch">
-                    <input type="checkbox" id="armedSwitch" onchange="togglePath('/home/armed', this.checked)">
-                    <span class="slider"></span>
-                </label>
+        <div class="control-card">
+            <div class="control-info">
+                <div class="icon-box">🛡</div>
+                <div class="control-text">
+                    <h3>Режим охорони</h3>
+                    <div class="status-text" id="armedStatus">Знято</div>
+                </div>
             </div>
-            <div class="icon-box" style="margin-bottom: 12px;">🛡</div>
-            <div class="status-text" id="armedStatus">Знято з охорони</div>
+            <label class="switch">
+                <input type="checkbox" id="armedSwitch" onchange="togglePath('/home/armed', this.checked)">
+                <span class="slider"></span>
+            </label>
         </div>
     </div>
 </div>
 
 <script>
+    // Ініціалізація Firebase
     const firebaseConfig = {
         databaseURL: "https://vlad-b0870-default-rtdb.europe-west1.firebasedatabase.app"
     };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Клімат
+    // Перемикання теми (Темна / Світла)
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        const isLight = document.body.classList.contains('light-theme');
+        document.getElementById('themeIcon').innerText = isLight ? '🌙' : '☀️';
+        document.getElementById('themeText').innerText = isLight ? 'Темна' : 'Світла';
+    }
+
+    // Телеметрія (Оновлення в 1 карточці)
     database.ref('/home/temperature').on('value', snap => { document.getElementById('temp').innerText = snap.val() ?? '--'; });
     database.ref('/home/humidity').on('value', snap => { document.getElementById('hum').innerText = snap.val() ?? '--'; });
     
-    // Газ
     database.ref('/home/gas').on('value', snap => {
         const val = snap.val() || 0;
         document.getElementById('gas').innerText = val;
         
         const percent = Math.min(Math.round((val / 4095) * 100), 100);
+        document.getElementById('gasPercent').innerText = percent + '%';
+        
         const progressBar = document.getElementById('gasProgress');
-        const statusText = document.getElementById('gasStatus');
+        const badge = document.getElementById('gasBadge');
 
         progressBar.style.width = percent + '%';
 
         if (val > 2000) {
             progressBar.style.backgroundColor = 'var(--accent-red)';
-            statusText.innerText = '⚠️ УВАГА! Витік газу!';
-            statusText.className = 'status-text danger';
+            badge.innerText = '⚠️ НЕБЕЗПЕКА ГАЗУ!';
+            badge.style.color = 'var(--accent-red)';
         } else {
             progressBar.style.backgroundColor = 'var(--accent-green)';
-            statusText.innerText = 'Повітря в нормі';
-            statusText.className = 'status-text';
+            badge.innerText = '✅ В нормі';
+            badge.style.color = 'var(--accent-green)';
         }
     });
 
@@ -328,7 +384,7 @@
         const state = snap.val() || false;
         document.getElementById('armedSwitch').checked = state;
         const txt = document.getElementById('armedStatus');
-        txt.innerText = state ? 'Під охороною' : 'Знято з охорони';
+        txt.innerText = state ? 'Під охороною' : 'Знято';
         txt.className = state ? 'status-text danger' : 'status-text';
     });
 
