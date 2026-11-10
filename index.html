@@ -94,7 +94,7 @@
         }
         .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); display: inline-block; }
 
-        /* Загальний блок телеметрії (все в 1 місці) */
+        /* Загальний блок телеметрії */
         .telemetry-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -131,9 +131,8 @@
         .telemetry-val { font-size: 1.4rem; font-weight: 700; color: var(--text-main); }
         .telemetry-unit { font-size: 0.9rem; font-weight: 500; color: var(--text-sub); }
 
-        /* Прогрес-бар газу */
+        /* Графічна смужка газу */
         .progress-container { margin-top: 14px; }
-        .progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 6px; }
         .progress-bar-bg { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
         .progress-bar-fill { height: 100%; width: 0%; background: var(--accent-green); transition: width 0.4s ease, background-color 0.4s ease; }
 
@@ -235,10 +234,6 @@
         </div>
 
         <div class="progress-container">
-            <div class="progress-info">
-                <span>Концентрація газу MQ-2</span>
-                <span id="gasPercent">0%</span>
-            </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="gasProgress"></div>
             </div>
@@ -325,7 +320,7 @@
         document.getElementById('themeText').innerText = isLight ? 'Темна' : 'Світла';
     }
 
-    // Телеметрія (Оновлення в 1 карточці)
+    // Оновлення датчиків
     database.ref('/home/temperature').on('value', snap => { document.getElementById('temp').innerText = snap.val() ?? '--'; });
     database.ref('/home/humidity').on('value', snap => { document.getElementById('hum').innerText = snap.val() ?? '--'; });
     
@@ -333,13 +328,11 @@
         const val = snap.val() || 0;
         document.getElementById('gas').innerText = val;
         
-        const percent = Math.min(Math.round((val / 4095) * 100), 100);
-        document.getElementById('gasPercent').innerText = percent + '%';
-        
+        const fillPercent = Math.min(Math.round((val / 4095) * 100), 100);
         const progressBar = document.getElementById('gasProgress');
         const badge = document.getElementById('gasBadge');
 
-        progressBar.style.width = percent + '%';
+        progressBar.style.width = fillPercent + '%';
 
         if (val > 2000) {
             progressBar.style.backgroundColor = 'var(--accent-red)';
