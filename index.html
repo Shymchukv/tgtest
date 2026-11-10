@@ -2,115 +2,137 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Розумний Дім</title>
-    
-    <!-- Підключення Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
-
-        // Твої ключі
-        const firebaseConfig = {
-            apiKey: "AIzaSyAHS9DrfOO9qS4GY1rbmgO4KDMaJphhjYs",
-            databaseURL: "https://vlad-b0870-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "vlad-b0870"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Посилання на конкретні комірки в базі
-        const dbRef = {
-            light: ref(db, 'home/light'),
-            door: ref(db, 'home/door'),
-            armed: ref(db, 'home/armed'),
-            temp: ref(db, 'home/temperature'),
-            hum: ref(db, 'home/humidity'),
-            gas: ref(db, 'home/gas')
-        };
-
-        // Локальні змінні
-        let state = { light: false, door: false, armed: false };
-
-        // ЗЧИТУВАННЯ: Автоматично оновлюємо цифри на екрані при зміні в базі
-        onValue(dbRef.temp, (snap) => { document.getElementById('valTemp').innerText = snap.val() ? snap.val() + " °C" : "-- °C"; });
-        onValue(dbRef.hum, (snap) => { document.getElementById('valHum').innerText = snap.val() ? snap.val() + " %" : "-- %"; });
-        onValue(dbRef.gas, (snap) => { 
-            let gasLvl = snap.val();
-            document.getElementById('valGas').innerText = gasLvl > 2000 ? "⚠️ НЕБЕЗПЕКА (" + gasLvl + ")" : "✅ В нормі";
-            document.getElementById('valGas').style.color = gasLvl > 2000 ? "#ff4040" : "#4facfe";
-        });
-
-        // Оновлюємо вигляд кнопок залежно від стану
-        onValue(dbRef.light, (snap) => { 
-            state.light = snap.val(); 
-            document.getElementById('txtLight').innerText = state.light ? "Світло: УВІМК" : "Світло: ВИМК";
-            document.getElementById('cardLight').style.background = state.light ? "rgba(255, 200, 0, 0.2)" : "rgba(255, 255, 255, 0.05)";
-        });
-        onValue(dbRef.door, (snap) => { 
-            state.door = snap.val(); 
-            document.getElementById('txtDoor').innerText = state.door ? "Двері: ВІДКРИТІ" : "Двері: ЗАКРИТІ";
-            document.getElementById('cardDoor').style.background = state.door ? "rgba(0, 255, 100, 0.2)" : "rgba(255, 255, 255, 0.05)";
-        });
-        onValue(dbRef.armed, (snap) => { 
-            state.armed = snap.val(); 
-            document.getElementById('txtArm').innerText = state.armed ? "Охорона: АКТИВНА 🔴" : "Охорона: ВИМКНЕНА";
-            document.getElementById('cardArm').style.background = state.armed ? "rgba(255, 0, 0, 0.3)" : "rgba(255, 255, 255, 0.05)";
-        });
-
-        // ЗАПИС: Відправка команд у базу при кліку
-        window.toggleLight = () => set(dbRef.light, !state.light);
-        window.toggleDoor = () => set(dbRef.door, !state.door);
-        window.toggleArm = () => set(dbRef.armed, !state.armed);
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розумний Дім — Панель Керування</title>
     <style>
-        body { background-color: #1a1a2e; color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { width: 100%; max-width: 400px; padding: 20px; box-sizing: border-box; }
-        
-        .climate-box { background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
-        .climate-box h3 { margin: 0 0 15px 0; font-size: 18px; text-align: center; }
-        .climate-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
-        .climate-row span { font-weight: bold; color: #4facfe; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
-        .card:active { transform: scale(0.95); }
-        .icon-wrapper { font-size: 30px; margin-bottom: 10px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
-        .card span { font-size: 14px; font-weight: 600; text-align: center; }
-        .full-width { grid-column: 1 / -1; }
-        
-        .light .icon-wrapper { background: linear-gradient(135deg, #f6d365, #fda085); }
-        .door .icon-wrapper { background: linear-gradient(135deg, #11998e, #38ef7d); }
-        .arm .icon-wrapper { background: linear-gradient(135deg, #ff0040, #b30000); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding: 20px; }
+        .dashboard { width: 100%; max-width: 800px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .card { background: #1e293b; border-radius: 16px; padding: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        .card h3 { font-size: 1.1rem; color: #94a3b8; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .value { font-size: 2.2rem; font-weight: bold; color: #38bdf8; }
+        .unit { font-size: 1rem; color: #64748b; }
+        .btn { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .btn-on { background: #22c55e; color: #fff; }
+        .btn-on:hover { background: #16a34a; }
+        .btn-off { background: #ef4444; color: #fff; }
+        .btn-off:hover { background: #dc2626; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .badge-ok { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .header { grid-column: 1 / -1; text-align: center; padding: 10px 0 20px 0; }
+        .header h1 { font-size: 1.8rem; color: #f8fafc; }
+        .header p { color: #64748b; font-size: 0.9rem; }
     </style>
+    <!-- Firebase JS SDK (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="climate-box">
-            <h3>📊 Дані в реальному часі</h3>
-            <div class="climate-row">🌡 Температура: <span id="valTemp">-- °C</span></div>
-            <div class="climate-row">💧 Вологість: <span id="valHum">-- %</span></div>
-            <div class="climate-row">💨 Газ: <span id="valGas">--</span></div>
-        </div>
 
-        <div class="grid">
-            <div class="card light" id="cardLight" onclick="toggleLight()">
-                <div class="icon-wrapper">💡</div>
-                <span id="txtLight">Світло: ВИМК</span>
-            </div>
-            
-            <div class="card door" id="cardDoor" onclick="toggleDoor()">
-                <div class="icon-wrapper">🚪</div>
-                <span id="txtDoor">Двері: ЗАКРИТІ</span>
-            </div>
-
-            <div class="card arm full-width" id="cardArm" onclick="toggleArm()">
-                <div class="icon-wrapper">🛡</div>
-                <span id="txtArm">Охорона: ВИМКНЕНА</span>
-            </div>
-        </div>
+<div class="dashboard">
+    <div class="header">
+        <h1>🏡 Розумний Дім (ESP32)</h1>
+        <p>Панель моніторингу та віддаленого керування в реальному часі</p>
     </div>
+
+    <!-- Температура -->
+    <div class="card">
+        <h3>🌡 Температура</h3>
+        <div class="value" id="temp">-- <span class="unit">°C</span></div>
+    </div>
+
+    <!-- Вологість -->
+    <div class="card">
+        <h3>💧 Вологість</h3>
+        <div class="value" id="hum">-- <span class="unit">%</span></div>
+    </div>
+
+    <!-- Рівень газу -->
+    <div class="card">
+        <h3>💨 Рівень газу</h3>
+        <div class="value" id="gas">-- <span class="unit">/ 4095</span></div>
+        <div style="margin-top: 10px;" id="gasStatus"><span class="status-badge badge-ok">Норма</span></div>
+    </div>
+
+    <!-- Дверний замок -->
+    <div class="card">
+        <h3>🚪 Дверний замок</h3>
+        <div id="doorStatus" style="margin-bottom: 10px;"><span class="status-badge badge-ok">Зачинено</span></div>
+        <button class="btn btn-on" onclick="togglePath('/home/door')">Змінити стан дверей</button>
+    </div>
+
+    <!-- Фасадне світло -->
+    <div class="card">
+        <h3>🌳 Фасадне світло</h3>
+        <div id="outdoorStatus" style="margin-bottom: 10px;"><span class="status-badge badge-off">Вимкнено</span></div>
+        <button class="btn btn-on" onclick="togglePath('/home/light_outdoor')">Переключити фасад</button>
+    </div>
+
+    <!-- Кімнатне світло -->
+    <div class="card">
+        <h3>🏠 Кімнатне світло</h3>
+        <div id="indoorStatus" style="margin-bottom: 10px;"><span class="status-badge badge-off">Вимкнено</span></div>
+        <button class="btn btn-on" onclick="togglePath('/home/light_indoor')">Переключити кімнату</button>
+    </div>
+
+    <!-- Режим охорони -->
+    <div class="card">
+        <h3>🛡 Система охорони</h3>
+        <div id="armedStatus" style="margin-bottom: 10px;"><span class="status-badge badge-off">Деактивовано</span></div>
+        <button class="btn btn-off" onclick="togglePath('/home/armed')">Переключити охорону</button>
+    </div>
+</div>
+
+<script>
+    // Конфігурація Firebase
+    const firebaseConfig = {
+        databaseURL: "https://vlad-b0870-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Зчитування даних у реальному часі
+    database.ref('/home/temperature').on('value', snap => { document.getElementById('temp').innerHTML = (snap.val() || '--') + ' <span class="unit">°C</span>'; });
+    database.ref('/home/humidity').on('value', snap => { document.getElementById('hum').innerHTML = (snap.val() || '--') + ' <span class="unit">%</span>'; });
+    
+    database.ref('/home/gas').on('value', snap => {
+        const val = snap.val() || 0;
+        document.getElementById('gas').innerHTML = val + ' <span class="unit">/ 4095</span>';
+        const st = document.getElementById('gasStatus');
+        if (val > 2000) {
+            st.innerHTML = '<span class="status-badge badge-danger">⚠️ НЕБЕЗПЕКА ГАЗУ!</span>';
+        } else {
+            st.innerHTML = '<span class="status-badge badge-ok">✅ В нормі</span>';
+        }
+    });
+
+    database.ref('/home/door').on('value', snap => {
+        const val = snap.val();
+        document.getElementById('doorStatus').innerHTML = val ? '<span class="status-badge badge-danger">🔓 Відчинено</span>' : '<span class="status-badge badge-ok">🔒 Зачинено</span>';
+    });
+
+    database.ref('/home/light_outdoor').on('value', snap => {
+        const val = snap.val();
+        document.getElementById('outdoorStatus').innerHTML = val ? '<span class="status-badge badge-ok">💡 Увімкнено</span>' : '<span class="status-badge badge-off">⚫ Вимкнено</span>';
+    });
+
+    database.ref('/home/light_indoor').on('value', snap => {
+        const val = snap.val();
+        document.getElementById('indoorStatus').innerHTML = val ? '<span class="status-badge badge-ok">💡 Увімкнено</span>' : '<span class="status-badge badge-off">⚫ Вимкнено</span>';
+    });
+
+    database.ref('/home/armed').on('value', snap => {
+        const val = snap.val();
+        document.getElementById('armedStatus').innerHTML = val ? '<span class="status-badge badge-danger">🛡 Під охороною</span>' : '<span class="status-badge badge-ok">🔓 Знято з охорони</span>';
+    });
+
+    // Перемикання станів прапорців
+    function togglePath(path) {
+        database.ref(path).once('value').then(snap => {
+            database.ref(path).set(!snap.val());
+        });
+    }
+</script>
 </body>
 </html>
